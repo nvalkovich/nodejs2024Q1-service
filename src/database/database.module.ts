@@ -1,19 +1,11 @@
 import { Module } from '@nestjs/common';
+import { TrackEntity } from 'src/tracks/entities/track.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 
 export interface Artist {
   id: string; // uuid v4
   name: string;
   grammy: boolean;
-}
-
-export interface Track {
-  id: string; // uuid v4
-  login: string;
-  password: string;
-  version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
 }
 
 export interface Album {
@@ -34,7 +26,7 @@ export class Database {
   static instance: Database | undefined;
   users: UserEntity[];
   artists: Artist[];
-  tracks: Track[];
+  tracks: TrackEntity[];
   albums: Album[];
   favorites: Favorites[];
 
@@ -58,8 +50,16 @@ export class Database {
     return this.users;
   }
 
+  getAllTracks() {
+    return this.tracks;
+  }
+
   getUserById(userId: string) {
     return this.users.find((user) => user.id === userId);
+  }
+
+  getTrackById(trackId: string) {
+    return this.tracks.find((track) => track.id === trackId);
   }
 
   createUser(newUser: UserEntity) {
@@ -67,8 +67,17 @@ export class Database {
     return newUser;
   }
 
+  createTrack(newTrack: TrackEntity) {
+    this.tracks.push(newTrack);
+    return newTrack;
+  }
+
   deleteUser(userId: string) {
     return (this.users = this.users.filter((user) => user.id !== userId));
+  }
+
+  deleteTrack(trackId: string) {
+    return (this.tracks = this.tracks.filter((track) => track.id !== trackId));
   }
 
   updateUser(updatedUser: UserEntity) {
@@ -79,5 +88,15 @@ export class Database {
     this.users = updatedUsers;
 
     return updatedUser;
+  }
+
+  updateTrack(updatedTrack: TrackEntity) {
+    const updatedTracks = this.tracks.map((track) =>
+      track.id === updatedTrack.id ? updatedTrack : track,
+    );
+
+    this.tracks = updatedTracks;
+
+    return updatedTrack;
   }
 }
