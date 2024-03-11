@@ -20,12 +20,10 @@ export class TracksService {
 
     const newTrack = new TrackEntity({
       id: v4(),
-      ...createTrackDto,
       artistId: null,
       albumId: null,
+      ...createTrackDto,
     });
-
-    console.log('NEWTRACK', newTrack);
 
     return this.db.createTrack(newTrack);
   }

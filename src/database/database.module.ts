@@ -1,19 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TrackEntity } from 'src/tracks/entities/track.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
-
-export interface Artist {
-  id: string; // uuid v4
-  name: string;
-  grammy: boolean;
-}
-
-export interface Album {
-  id: string; // uuid v4
-  name: string;
-  year: number;
-  artistId: string | null; // refers to Artist
-}
+import { ArtistEntity } from 'src/artists/entities/artist.entity';
+import { AlbumEntity } from 'src/albums/entities/album.entity';
 
 export interface Favorites {
   artists: string[]; // favorite artists ids
@@ -25,9 +14,9 @@ export interface Favorites {
 export class Database {
   static instance: Database | undefined;
   users: UserEntity[];
-  artists: Artist[];
+  artists: ArtistEntity[];
   tracks: TrackEntity[];
-  albums: Album[];
+  albums: AlbumEntity[];
   favorites: Favorites[];
 
   constructor() {
@@ -54,12 +43,28 @@ export class Database {
     return this.tracks;
   }
 
+  getAllArtists() {
+    return this.artists;
+  }
+
+  getAllAlbums() {
+    return this.albums;
+  }
+
   getUserById(userId: string) {
     return this.users.find((user) => user.id === userId);
   }
 
   getTrackById(trackId: string) {
     return this.tracks.find((track) => track.id === trackId);
+  }
+
+  getArtistById(artistId: string) {
+    return this.artists.find((artist) => artist.id === artistId);
+  }
+
+  getAlbumById(albumId: string) {
+    return this.albums.find((album) => album.id === albumId);
   }
 
   createUser(newUser: UserEntity) {
@@ -72,12 +77,50 @@ export class Database {
     return newTrack;
   }
 
+  createArtist(newArtist: ArtistEntity) {
+    this.artists.push(newArtist);
+    return newArtist;
+  }
+
+  createAlbum(newAlbum: AlbumEntity) {
+    this.albums.push(newAlbum);
+    return newAlbum;
+  }
+
   deleteUser(userId: string) {
     return (this.users = this.users.filter((user) => user.id !== userId));
   }
 
   deleteTrack(trackId: string) {
     return (this.tracks = this.tracks.filter((track) => track.id !== trackId));
+  }
+
+  deleteArtist(artistId: string) {
+    this.albums = this.albums.map((album) =>
+      Object.assign(album, {
+        artistId: album.artistId === artistId ? null : artistId,
+      }),
+    );
+
+    this.tracks = this.tracks.map((track) =>
+      Object.assign(track, {
+        artistId: track.artistId === artistId ? null : artistId,
+      }),
+    );
+
+    return (this.artists = this.artists.filter(
+      (artist) => artist.id !== artistId,
+    ));
+  }
+
+  deleteAlbum(albumId: string) {
+    this.tracks = this.tracks.map((track) =>
+      Object.assign(track, {
+        albumId: track.albumId === albumId ? null : track,
+      }),
+    );
+
+    return (this.albums = this.albums.filter((album) => album.id !== albumId));
   }
 
   updateUser(updatedUser: UserEntity) {
@@ -98,5 +141,25 @@ export class Database {
     this.tracks = updatedTracks;
 
     return updatedTrack;
+  }
+
+  updateArtist(updatedArtist: ArtistEntity) {
+    const updatedArtists = this.artists.map((artist) =>
+      artist.id === updatedArtist.id ? updatedArtist : artist,
+    );
+
+    this.artists = updatedArtists;
+
+    return updatedArtist;
+  }
+
+  updateAlbum(updatedAlbum: AlbumEntity) {
+    const updatedAlbums = this.albums.map((album) =>
+      album.id === updatedAlbum.id ? updatedAlbum : album,
+    );
+
+    this.albums = updatedAlbums;
+
+    return updatedAlbum;
   }
 }
