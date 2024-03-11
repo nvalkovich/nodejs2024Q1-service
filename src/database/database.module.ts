@@ -3,12 +3,7 @@ import { TrackEntity } from 'src/tracks/entities/track.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { ArtistEntity } from 'src/artists/entities/artist.entity';
 import { AlbumEntity } from 'src/albums/entities/album.entity';
-
-export interface Favorites {
-  artists: string[]; // favorite artists ids
-  albums: string[]; // favorite albums ids
-  tracks: string[]; // favorite tracks ids
-}
+import { FavoritesEntity } from 'src/favorites/entities/favorites.entity';
 
 @Module({})
 export class Database {
@@ -17,14 +12,18 @@ export class Database {
   artists: ArtistEntity[];
   tracks: TrackEntity[];
   albums: AlbumEntity[];
-  favorites: Favorites[];
+  favorites: FavoritesEntity;
 
   constructor() {
     this.users = [];
     this.artists = [];
     this.tracks = [];
     this.albums = [];
-    this.favorites = [];
+    this.favorites = {
+      artists: [],
+      albums: [],
+      tracks: [],
+    };
   }
 
   static getInstance() {
@@ -49,6 +48,37 @@ export class Database {
 
   getAllAlbums() {
     return this.albums;
+  }
+
+  getAllFavorites() {
+    const artists = this.favorites.artists.map((artistId) => {
+      const artist = this.getArtistById(artistId);
+      if (artist) {
+        return artist;
+      }
+    });
+
+    const albums = this.favorites.albums.map((albumId) => {
+      const album = this.getAlbumById(albumId);
+      if (album) {
+        return album;
+      }
+    });
+
+    const tracks = this.favorites.tracks.map((trackId) => {
+      const track = this.getTrackById(trackId);
+      if (track) {
+        return track;
+      }
+    });
+
+    const favoritesResponse = {
+      artists,
+      albums,
+      tracks,
+    };
+
+    return favoritesResponse;
   }
 
   getUserById(userId: string) {
@@ -116,7 +146,7 @@ export class Database {
   deleteAlbum(albumId: string) {
     this.tracks = this.tracks.map((track) =>
       Object.assign(track, {
-        albumId: track.albumId === albumId ? null : track,
+        albumId: track.albumId === albumId ? null : albumId,
       }),
     );
 
@@ -161,5 +191,51 @@ export class Database {
     this.albums = updatedAlbums;
 
     return updatedAlbum;
+  }
+
+  addTrackToFavorites(trackId: string) {
+    return this.favorites.tracks.push(trackId);
+  }
+
+  addAlbumToFavorites(albumId: string) {
+    return this.favorites.albums.push(albumId);
+  }
+
+  addArtistToFavorites(artistId: string) {
+    return this.favorites.artists.push(artistId);
+  }
+
+  removeTrackFromFavorites(trackId: string) {
+    this.favorites = Object.assign(this.favorites, {
+      tracks: this.favorites.tracks.filter((id) => id != trackId),
+    });
+    return this.favorites;
+  }
+
+  removeAlbumFromFavorites(albumId: string) {
+    this.favorites = Object.assign(this.favorites, {
+      albums: this.favorites.albums.filter((id) => id != albumId),
+    });
+    return this.favorites;
+  }
+
+  removeArtistFromFavorites(artistId: string) {
+    this.favorites = Object.assign(this.favorites, {
+      artists: this.favorites.artists.filter((id) => id != artistId),
+    });
+
+    return this.favorites;
+  }
+
+  isTrackInFavorites(trackId: string) {
+    return this.favorites.tracks.includes(trackId);
+  }
+
+  isAlbumInFavorites(albumId: string) {
+    return this.favorites.albums.includes(albumId);
+  }
+
+  isArtistInFavorites(artistId: string) {
+    return this.favorites.artists.includes(artistId);
   }
 }

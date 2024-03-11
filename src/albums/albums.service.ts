@@ -63,6 +63,8 @@ export class AlbumsService {
       throw new NotFoundException('Album not found');
     }
 
+    this.db.removeAlbumFromFavorites(id);
+
     return this.db.deleteAlbum(id);
   }
 }

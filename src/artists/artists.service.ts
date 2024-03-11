@@ -62,6 +62,8 @@ export class ArtistsService {
       throw new NotFoundException('Artist not found');
     }
 
+    this.db.removeArtistFromFavorites(id);
+
     return this.db.deleteArtist(id);
   }
 }

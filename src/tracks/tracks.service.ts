@@ -64,6 +64,8 @@ export class TracksService {
       throw new NotFoundException('Track not found');
     }
 
+    this.db.removeTrackFromFavorites(id);
+
     return this.db.deleteTrack(id);
   }
 }
