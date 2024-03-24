@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    build: database
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=pwd
+    network_mode: bridge
+    restart: on-failure
+  app:
+    build: .
+    ports:
+      - 4000:4000
+    network_mode: bridge
+    restart: on-failure
