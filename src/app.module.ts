@@ -9,6 +9,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+import { Artist } from './artists/entities/artist.entity';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { User } from './users/entities/user.entity';
         migrationsRun: true,
         dropSchema: true,
         logger: 'debug',
-        entities: [User],
+        entities: [User, Artist],
       }),
       inject: [ConfigService],
     }),
