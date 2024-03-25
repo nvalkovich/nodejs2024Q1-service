@@ -11,16 +11,16 @@ import {
 import { TracksService } from './tracks.service';
 import { CreateTrackDto, FindOneParams } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { TrackEntity } from './entities/track.entity';
+import { Track as TrackEntity } from './entities/track.entity';
 
 @Controller('track')
 export class TracksController {
   constructor(private readonly tracksService: TracksService) {}
 
   @Post()
-  create(@Body() body: CreateTrackDto): TrackEntity {
-    console.log(body);
-    const tracks = this.tracksService.create(body);
+  async create(@Body() body: CreateTrackDto): Promise<TrackEntity> {
+    const tracks = await this.tracksService.create(body);
+
     return tracks;
   }
 

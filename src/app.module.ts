@@ -10,6 +10,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { Artist } from './artists/entities/artist.entity';
+import { Album } from './albums/entities/album.entity';
+import { Track } from './tracks/entities/track.entity';
+import {
+  FavAlbums,
+  FavArtists,
+  FavTracks,
+} from './favorites/entities/favorites.entity';
 
 @Module({
   imports: [
@@ -34,7 +41,15 @@ import { Artist } from './artists/entities/artist.entity';
         migrationsRun: true,
         dropSchema: true,
         logger: 'debug',
-        entities: [User, Artist],
+        entities: [
+          User,
+          Artist,
+          Album,
+          Track,
+          FavTracks,
+          FavAlbums,
+          FavArtists,
+        ],
       }),
       inject: [ConfigService],
     }),
