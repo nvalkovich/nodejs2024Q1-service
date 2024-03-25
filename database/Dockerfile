@@ -1,1 +1,5 @@
-FROM postgres:16.2
+FROM postgres:alpine
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD pwd
+ENV POSTGRES_DB LocalDB
+EXPOSE ${DB_PORT}

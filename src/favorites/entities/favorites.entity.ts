@@ -11,13 +11,11 @@ export class FavTracks {
   name: string;
 
   @Column({ nullable: true })
-  @OneToOne(() => Artist, {
-    onDelete: 'SET NULL',
-  })
+  @OneToOne(() => Artist, { onDelete: 'SET NULL' })
   artistId: string | null;
 
   @Column({ nullable: true })
-  @OneToOne(() => Album, { onDelete: 'SET NULL', eager: false })
+  @OneToOne(() => Album, { onDelete: 'SET NULL' })
   albumId: string | null;
 
   @Column()
@@ -36,9 +34,7 @@ export class FavAlbums {
   year: number;
 
   @Column({ nullable: true })
-  @OneToOne(() => Artist, {
-    onDelete: 'SET NULL',
-  })
+  @OneToOne(() => Artist, { onDelete: 'SET NULL' })
   artistId: string | null;
 }
 
