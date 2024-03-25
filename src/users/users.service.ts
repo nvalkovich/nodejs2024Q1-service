@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Database } from 'src/database/database.module';
 import { v4 } from 'uuid';
 import { User, User as UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,8 +12,6 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  private db = Database.getInstance();
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -29,19 +26,9 @@ export class UsersService {
       id: v4(),
       ...createUserDto,
       version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
     });
 
-    const newUser2 = new UserEntity({
-      id: v4(),
-      ...createUserDto,
-      version: 1,
-    });
-
-    const created = this.userRepository.create(newUser2);
-
-    this.db.createUser(newUser);
+    const created = this.userRepository.create(newUser);
 
     return await this.userRepository.save(created);
   }
@@ -80,8 +67,6 @@ export class UsersService {
       version: user.version + 1,
     });
 
-    this.db.updateUser(updatedUser);
-
     return await this.userRepository.save(updatedUser);
   }
 
@@ -92,8 +77,6 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    this.db.deleteUser(id);
 
     return this.userRepository.delete(id);
   }
