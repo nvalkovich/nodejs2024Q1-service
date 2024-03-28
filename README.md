@@ -4,11 +4,13 @@
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- Docker
+- PostgreSQL Server
 
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/nvalkovich/nodejs2024Q1-service
 ```
 
 ## Installing NPM modules
@@ -17,15 +19,24 @@ git clone {repository URL}
 npm install
 ```
 
+## Create .env file
+
+Rename existing .env.example to .env. You can correct configuration to your preferences
+
 ## Running application
 
+You can start the application in dev or prod mode by running
 ```
-npm start
+npm run start:dev
 ```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+or 
+```
+npm run start:prod
+```
+Also you can run the application in docker containers
+```
+docker compose up
+```
 
 ## Testing
 
@@ -63,6 +74,19 @@ npm run lint
 
 ```
 npm run format
+```
+
+### Vulnerabilities scanning
+
+To scan application image for the vulnerabilities
+```
+npm run scan:app
+```
+
+To scan database image for the vulnerabilities
+
+```
+npm run scan:db
 ```
 
 ### Debugging in VSCode
