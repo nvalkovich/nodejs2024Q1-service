@@ -18,10 +18,6 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    if (!createUserDto.password || !createUserDto.login) {
-      throw new NotFoundException('User not found');
-    }
-
     const newUser = new UserEntity({
       id: v4(),
       ...createUserDto,
@@ -43,6 +39,16 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    return user;
+  }
+
+  async findOneByLogin(login: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        login,
+      },
+    });
 
     return user;
   }

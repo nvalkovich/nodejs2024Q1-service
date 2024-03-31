@@ -17,6 +17,7 @@ import {
   FavArtists,
   FavTracks,
 } from './favorites/entities/favorites.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import {
       }),
       inject: [ConfigService],
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
