@@ -20,6 +20,8 @@ export class User {
   @UpdateDateColumn()
   // @Column()
   updatedAt: number; // timestamp of last update
+  @Column({ nullable: true })
+  refreshToken: string;
 
   @Exclude()
   @Column()
