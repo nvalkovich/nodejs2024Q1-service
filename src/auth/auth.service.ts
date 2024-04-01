@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   ForbiddenException,
   Injectable,
   UnauthorizedException,
@@ -39,6 +38,53 @@ export class AuthService {
     }
 
     throw new UnauthorizedException();
+  }
+
+  async refresh(refreshToken: string): Promise<any> {
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token in body)');
+    }
+
+    try {
+      const payload = await this.getPayload(refreshToken);
+      const tokens = await this.getTokens(payload);
+      return tokens;
+    } catch {
+      throw new ForbiddenException('Refresh token is invalid or expired');
+    }
+  }
+
+  async getPayload(refreshToken: string) {
+    const secret = this.configService.get('JWT_SECRET_REFRESH_KEY');
+    const { userId, login } = await this.jwtService.verify(refreshToken, {
+      secret,
+    });
+
+    const payload = { userId, login };
+
+    return payload || null;
+  }
+
+  async getTokens(payload: { userId: string; login: string }): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: this.configService.get('TOKEN_EXPIRE_TIME'),
+      secret: this.configService.get('JWT_SECRET_KEY'),
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: this.configService.get('TOKEN_REFRESH_EXPIRE_TIME'),
+      secret: this.configService.get('JWT_SECRET_REFRESH_KEY'),
+    });
+
+    await this.usersService.updateRefreshToken(payload.userId, refreshToken);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async signIn(dto: AuthDto): Promise<{ accessToken: string }> {
