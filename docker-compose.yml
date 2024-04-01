@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: db_image
+    container_name: db_container
+    build:
+      context: .
+      dockerfile: ./database/Dockerfile
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    env_file:
+      - .env
+    volumes:
+      - data:/var/lib/postgresql/data
+      - logs:/var/log/postgresql
+    restart: always
+    networks:
+      - postgres
+
+  app:
+    image: app_image
+    container_name: app_container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src/
+    restart: always
+    networks:
+      - postgres
+    depends_on:
+      - db
+
+volumes:
+  data:
+  logs:
+
+networks:
+  postgres:
+    driver: bridge

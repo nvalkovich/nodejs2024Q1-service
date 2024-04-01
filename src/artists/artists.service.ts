@@ -6,32 +6,38 @@ import {
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { v4 } from 'uuid';
-import { ArtistEntity } from './entities/artist.entity';
-import { Database } from 'src/database/database.module';
+import { Artist } from './entities/artist.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistsService {
-  private db = Database.getInstance();
+  constructor(
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
+  ) {}
 
-  create(createArtistDto: CreateArtistDto): ArtistEntity {
+  async create(createArtistDto: CreateArtistDto) {
     if (!createArtistDto.name || !createArtistDto.grammy) {
       throw new BadRequestException('There is no required fields');
     }
 
-    const newArtist = new ArtistEntity({
+    const newArtist = new Artist({
       id: v4(),
       ...createArtistDto,
     });
 
-    return this.db.createArtist(newArtist);
+    const created = this.artistRepository.create(newArtist);
+
+    return await this.artistRepository.save(created);
   }
 
   findAll() {
-    return this.db.getAllArtists();
+    return this.artistRepository.find();
   }
 
-  findOne(id: string) {
-    const artist = this.db.getArtistById(id);
+  async findOne(id: string) {
+    const artist = await this.artistRepository.findOneBy({ id });
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
@@ -40,8 +46,8 @@ export class ArtistsService {
     return artist;
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    const artist = this.db.getArtistById(id);
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    const artist = await this.artistRepository.findOneBy({ id });
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
@@ -52,18 +58,16 @@ export class ArtistsService {
       ...updateArtistDto,
     };
 
-    return this.db.updateArtist(updatedArtist);
+    return await this.artistRepository.save(updatedArtist);
   }
 
-  remove(id: string) {
-    const artist = this.db.getArtistById(id);
+  async remove(id: string) {
+    const artist = await this.artistRepository.findOneBy({ id });
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }
 
-    this.db.removeArtistFromFavorites(id);
-
-    return this.db.deleteArtist(id);
+    return this.artistRepository.delete(id);
   }
 }

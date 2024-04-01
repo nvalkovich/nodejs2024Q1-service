@@ -5,15 +5,19 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Database } from 'src/database/database.module';
 import { v4 } from 'uuid';
-import { UserEntity } from './entities/user.entity';
+import { User, User as UserEntity } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  private db = Database.getInstance();
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     if (!createUserDto.password || !createUserDto.login) {
       throw new NotFoundException('User not found');
     }
@@ -22,20 +26,20 @@ export class UsersService {
       id: v4(),
       ...createUserDto,
       version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
     });
 
-    return this.db.createUser(newUser);
+    const created = this.userRepository.create(newUser);
+
+    return await this.userRepository.save(created);
   }
 
   findAll() {
-    return this.db.getAllUsers();
+    return this.userRepository.find();
   }
 
-  findOne(params: { id: string }) {
-    const user = this.db.getUserById(params.id);
-
+  async findOne(params: { id: string }) {
+    const { id } = params;
+    const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -43,8 +47,9 @@ export class UsersService {
     return user;
   }
 
-  update(params: { id: string }, updateUserDto: UpdateUserDto) {
-    const user = this.db.getUserById(params.id);
+  async update(params: { id: string }, updateUserDto: UpdateUserDto) {
+    const { id } = params;
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -60,19 +65,19 @@ export class UsersService {
       ...user,
       password: updateUserDto.newPassword,
       version: user.version + 1,
-      updatedAt: Date.now(),
     });
 
-    return this.db.updateUser(updatedUser);
+    return await this.userRepository.save(updatedUser);
   }
 
-  remove(params: { id: string }) {
-    const user = this.db.getUserById(params.id);
+  async remove(params: { id: string }) {
+    const { id } = params;
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    return this.db.deleteUser(params.id);
+    return this.userRepository.delete(id);
   }
 }

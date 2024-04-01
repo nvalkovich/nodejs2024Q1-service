@@ -13,16 +13,27 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto, FindOneParams } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserEntity } from './entities/user.entity';
+import { User as UserEntity } from './entities/user.entity';
 
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  create(@Body() createUserDto: CreateUserDto): UserEntity {
-    const users = this.usersService.create(createUserDto);
-    return users;
+  async create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<Partial<UserEntity>> {
+    const user = await this.usersService.create(createUserDto);
+
+    const createdUser = {
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      createdAt: Number(user.createdAt),
+      updatedAt: Number(user.updatedAt),
+    };
+
+    return createdUser;
   }
 
   @Get()
@@ -37,11 +48,20 @@ export class UsersController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Put(':id')
-  update(
+  async update(
     @Param() params: FindOneParams,
     @Body() updateUserDto: UpdateUserDto,
-  ): UserEntity {
-    return this.usersService.update(params, updateUserDto);
+  ): Promise<Partial<UserEntity>> {
+    const user = await this.usersService.update(params, updateUserDto);
+    const updatedUser = {
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      createdAt: Number(user.createdAt),
+      updatedAt: Number(user.updatedAt),
+    };
+
+    return updatedUser;
   }
 
   @Delete(':id')
