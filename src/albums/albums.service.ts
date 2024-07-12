@@ -9,12 +9,15 @@ import { v4 } from 'uuid';
 import { Album } from './entities/album.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { FavAlbums } from 'src/favorites/entities/favorites.entity';
 
 @Injectable()
 export class AlbumsService {
   constructor(
     @InjectRepository(Album)
     private readonly albumRepository: Repository<Album>,
+    @InjectRepository(FavAlbums)
+    private readonly favAlbumsRepository: Repository<FavAlbums>,
   ) {}
 
   async create(createAlbumDto: CreateAlbumDto) {
@@ -69,6 +72,8 @@ export class AlbumsService {
     if (!album) {
       throw new NotFoundException('Album not found');
     }
+
+    this.favAlbumsRepository.delete(id);
 
     return this.albumRepository.delete(id);
   }

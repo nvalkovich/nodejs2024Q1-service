@@ -9,12 +9,15 @@ import { v4 } from 'uuid';
 import { Artist } from './entities/artist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { FavArtists } from 'src/favorites/entities/favorites.entity';
 
 @Injectable()
 export class ArtistsService {
   constructor(
     @InjectRepository(Artist)
     private readonly artistRepository: Repository<Artist>,
+    @InjectRepository(FavArtists)
+    private readonly favArtistsRepository: Repository<FavArtists>,
   ) {}
 
   async create(createArtistDto: CreateArtistDto) {
@@ -68,6 +71,7 @@ export class ArtistsService {
       throw new NotFoundException('Artist not found');
     }
 
+    this.favArtistsRepository.delete(id);
     return this.artistRepository.delete(id);
   }
 }
